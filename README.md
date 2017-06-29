@@ -12,8 +12,20 @@ To make this easy for you you can run
 $ ./init-vagrant.sh
 ```
 
+First run
+---------
+
+``` sh
+$ vagrant up
+$ vagrant halt
+$ vagrant up
+```
+
 Run
 ---
+
+When it's not your first run and there is no more a need to install docker you
+can just do vagrant up
 
 ``` sh
 $ vagrant up
