@@ -10,7 +10,7 @@ echo I am provisioning...
 tail -n1 /etc/apk/repositories | sed -e 's/main/community/' >> /etc/apk/repositories
 apk --update --no-cache upgrade
 apk add --update --no-cache docker
-sed 's/^\(docker.*\)/\1vagrant/' -i /etc/group
+sed 's/^\\(docker.*\\)/\\1vagrant/' -i /etc/group
 rc-update add docker default
 rc-service docker start
 SCRIPT
