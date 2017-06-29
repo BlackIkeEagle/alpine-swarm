@@ -12,15 +12,6 @@ To make this easy for you you can run
 $ ./init-vagrant.sh
 ```
 
-First run
----------
-
-``` sh
-$ vagrant up
-$ vagrant halt
-$ vagrant up
-```
-
 Run
 ---
 
