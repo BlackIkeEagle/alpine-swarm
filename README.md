@@ -26,3 +26,12 @@ $ vagrant ssh node-1
 $ vagrant ssh node-2
 $ vagrant ssh node-3
 ```
+
+Init swarm
+----------
+
+run the following command to initialize the 3 node swarm
+
+``` sh
+./init-swarm.sh
+```
