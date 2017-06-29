@@ -1,1 +1,3 @@
 .vagrant
+client-cert
+server-cert
