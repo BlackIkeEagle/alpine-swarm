@@ -15,28 +15,46 @@ rc-update add docker default
 rc-service docker start
 SCRIPT
 
+$alpinestorage = <<SCRIPT
+echo I am provisioning...
+apk --update --no-cache upgrade
+apk add --update --no-cache nfs-utils
+rc-update add nfs default
+mkdir -p /srv/storage
+echo '/srv/storage 192.168.250.0/24(rw,async,no_subtree_check)' >> /etc/exports
+rc-service nfs start
+SCRIPT
+
 Vagrant.configure("2") do |config|
 
-  (1..3).each do |i|
-    config.vm.define "node-#{i}" do |node|
-      node.vm.box = "maier/alpine-3.6-x86_64"
+  (1..2).each do |i|
+    config.vm.define "manager-#{i}" do |manager|
+      manager.vm.box = "maier/alpine-3.7-x86_64"
+      manager.vm.synced_folder '.', '/vagrant', disabled: true
+      manager.vm.hostname = "manager-#{i}"
+      manager.vm.network :private_network, ip: "192.168.250.3#{i}"
+      manager.vm.provision "shell", inline: $alpinescript
+    end
+  end
+
+  (1..2).each do |j|
+    config.vm.define "node-#{j}" do |node|
+      node.vm.box = "maier/alpine-3.7-x86_64"
       node.vm.synced_folder '.', '/vagrant', disabled: true
-      node.vm.network :private_network, ip: "192.168.254.3#{i}"
+      node.vm.hostname = "node-#{j}"
+      node.vm.network :private_network, ip: "192.168.250.4#{j}"
       node.vm.provision "shell", inline: $alpinescript
     end
   end
 
-  # future sharing stuff
-  #(1..2).each do |j|
-    #config.vm.define "storage-#{j}" do |storage|
-      #storage.vm.box = "bento/freebsd-11.0"
-      ##storage.vm.box = "freebsd/FreeBSD-11.0-STABLE"
-      ##storage.vm.guest = :freebsd
-      #storage.ssh.shell = "sh"
-      ##storage.vm.base_mac = "080027D14C66"
-      #storage.vm.synced_folder '.', '/vagrant', disabled: true
-      #storage.vm.network :private_network, ip: "192.168.254.4#{j}"
-    #end
-  #end
+  (1..1).each do |k|
+    config.vm.define "storage-#{k}" do |storage|
+      storage.vm.box = "maier/alpine-3.7-x86_64"
+      storage.vm.synced_folder '.', '/vagrant', disabled: true
+      storage.vm.hostname = "storage-#{k}"
+      storage.vm.network :private_network, ip: "192.168.254.2#{k}"
+      storage.vm.provision "shell", inline: $alpinestorage
+    end
+  end
 
 end

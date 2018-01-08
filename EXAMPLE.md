@@ -16,14 +16,14 @@ $ docker service scale test_nginx=3
 $ docker service logs -f test_nginx
 ```
 
-Test if the nginx is working fine by browsing to http://192.168.254.31
+Test if the nginx is working fine by browsing to http://192.168.250.31
 
 see the logs
 
 to see the load banacing in action you can quickly run a siege
 
 ``` sh
-$ siege -c 50 -r 50 http://192.168.254.31/
+$ siege -c 50 -r 50 http://192.168.250.31/
 ```
 
 some example output of the logs when running siege against it

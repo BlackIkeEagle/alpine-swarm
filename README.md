@@ -1,5 +1,5 @@
-3 node alpine vagrant
-=====================
+4 node alpine docker swarm vagrant
+==================================
 
 First
 -----
@@ -25,15 +25,16 @@ $ vagrant up
 ssh into one of the nodes
 
 ``` sh
+$ vagrant ssh manager-1 
+$ vagrant ssh manager-2
 $ vagrant ssh node-1
 $ vagrant ssh node-2
-$ vagrant ssh node-3
 ```
 
 Init swarm
 ----------
 
-run the following command to initialize the 3 node swarm
+run the following command to initialize the 4 node swarm
 
 ``` sh
 ./init-swarm.sh
