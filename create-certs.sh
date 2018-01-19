@@ -1,12 +1,15 @@
 #!/usr/bin/env sh
 
+[ -d server-client ] && rm -r server-client
+[ -d server-cert ] && rm -r server-cert
+
 mkdir -p client-cert
 docker run --user=$(id -u) --rm -v $(pwd)/client-cert:/certs paulczar/omgwtfssl
 
 mkdir -p server-cert
 cp client-cert/ca.pem server-cert/
 
-docker run --rm -v $(pwd)/server-cert:/server \
+docker run --user=$(id -u) --rm -v $(pwd)/server-cert:/server \
     -v $(pwd)/client-cert:/certs \
     -e SSL_IP=127.0.0.1,192.168.250.31,192.168.250.32 \
     -e SSL_DNS=docker.local -e SSL_KEY=/server/key.pem \
