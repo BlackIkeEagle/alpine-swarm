@@ -23,7 +23,6 @@ apk add --update --no-cache docker nfs-utils
 sed -e 's/^\\(ttyS0.*\\)/#\\1/' -i /etc/inittab
 sed 's/^\\(docker.*\\)/\\1vagrant/' -i /etc/group
 rc-update add docker default
-rc-update add nfsclient default
 rc-update add nfsmount default
 mkdir -p /srv/storage
 echo '192.168.250.21:/srv/storage /srv/storage nfs defaults,rw 0 0' >> /etc/fstab
