@@ -22,6 +22,7 @@ apk --update --no-cache upgrade
 apk add --update --no-cache docker nfs-utils
 sed -e 's/^\\(ttyS0.*\\)/#\\1/' -i /etc/inittab
 sed 's/^\\(docker.*\\)/\\1vagrant/' -i /etc/group
+sed -e 's#^\\(DOCKER_OPTS.*\\)\\(\"\\)#\\1 --experimental=true --metrics-addr=0.0.0.0:9323\\2#g' -i /etc/conf.d/docker
 rc-update add docker default
 rc-update add nfsmount default
 mkdir -p /srv/storage
