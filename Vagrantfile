@@ -37,6 +37,9 @@ Vagrant.configure("2") do |config|
       storage.vm.hostname = "storage-#{a}"
       storage.vm.network :private_network, ip: "192.168.250.2#{a}"
       storage.vm.provision "shell", inline: $alpinestorage
+      storage.vm.provider :virtualbox do |v|
+        v.linked_clone = true
+      end
     end
   end
 
@@ -47,6 +50,9 @@ Vagrant.configure("2") do |config|
       manager.vm.hostname = "manager-#{b}"
       manager.vm.network :private_network, ip: "192.168.250.3#{b}"
       manager.vm.provision "shell", inline: $alpinescript
+      manager.vm.provider :virtualbox do |v|
+        v.linked_clone = true
+      end
     end
   end
 
@@ -57,6 +63,9 @@ Vagrant.configure("2") do |config|
       node.vm.hostname = "node-#{c}"
       node.vm.network :private_network, ip: "192.168.250.4#{c}"
       node.vm.provision "shell", inline: $alpinescript
+      node.vm.provider :virtualbox do |v|
+        v.linked_clone = true
+      end
     end
   end
 
