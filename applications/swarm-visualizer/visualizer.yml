@@ -1,0 +1,19 @@
+version: '3.3'
+
+services:
+  visualizer:
+    image: dockersamples/visualizer
+    ports:
+      - target: 8080
+        published: 8081
+        protocol: tcp
+        mode: ingress
+    volumes:
+      - type: bind
+        source: /var/run/docker.sock
+        target: /var/run/docker.sock
+        read_only: true
+    deploy:
+      placement:
+        constraints: [node.role == manager]
+
