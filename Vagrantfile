@@ -56,7 +56,7 @@ Vagrant.configure("2") do |config|
     end
   end
 
-  (1..2).each do |c|
+  (1..4).each do |c|
     config.vm.define "node-#{c}" do |node|
       node.vm.box = "maier/alpine-3.7-x86_64"
       node.vm.synced_folder '.', '/vagrant', disabled: true
