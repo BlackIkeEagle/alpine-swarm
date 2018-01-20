@@ -1,5 +1,11 @@
 version: '3.3'
 
+networks:
+  default:
+    ipam:
+      config:
+        - subnet: 10.100.1.0/24
+
 services:
   visualizer:
     image: dockersamples/visualizer

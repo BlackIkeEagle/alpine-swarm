@@ -1,7 +1,14 @@
 version: "3.3"
 
 networks:
+  default:
+    ipam:
+      config:
+        - subnet: 10.100.2.0/24
   net:
+    ipam:
+      config:
+        - subnet: 10.50.2.0/24
     driver: overlay
     attachable: true
 
