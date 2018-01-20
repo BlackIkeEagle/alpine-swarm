@@ -78,8 +78,7 @@ services:
       mode: replicated
       replicas: 1
       placement:
-        constraints:
-          - node.hostname == manager-2
+        constraints: [node.role == manager]
       resources:
         limits:
           memory: 128M
@@ -103,8 +102,7 @@ services:
       mode: replicated
       replicas: 1
       placement:
-        constraints:
-          - node.hostname == manager-2
+        constraints: [node.role == manager]
       resources:
         limits:
           memory: 128M
@@ -169,8 +167,7 @@ services:
       mode: replicated
       replicas: 1
       placement:
-        constraints:
-          - node.hostname == manager-2
+        constraints: [node.role == manager]
       resources:
         limits:
           memory: 2048M
@@ -196,8 +193,7 @@ services:
       mode: replicated
       replicas: 1
       placement:
-        constraints:
-          - node.hostname == manager-2
+        constraints: [node.role == manager]
       resources:
         limits:
           memory: 128M
