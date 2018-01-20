@@ -1,0 +1,18 @@
+# this line should be at the top of the file
+defaultEntryPoints = ["http"]
+
+# Entrypoints, http and https
+[entryPoints]
+[entryPoints.http]
+address = ":80"
+
+[docker]
+endpoint = "unix:///var/run/docker.sock"
+domain = "docker.localhost"
+watch = true
+swarmmode = true
+
+# Enable web backend.
+[web]
+address = ":8080"
+
