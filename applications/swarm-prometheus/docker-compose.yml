@@ -1,0 +1,203 @@
+version: "3.3"
+
+networks:
+  net:
+    driver: overlay
+    attachable: true
+
+volumes:
+    prometheus: {}
+    grafana: {}
+    alertmanager: {}
+
+configs:
+  caddy_config:
+    file: ./caddy/Caddyfile
+  dockerd_config:
+    file: ./dockerd-exporter/Caddyfile
+  node_rules:
+    file: ./prometheus/rules/swarm_node.rules
+  task_rules:
+    file: ./prometheus/rules/swarm_task.rules
+
+services:
+  dockerd-exporter:
+    image: stefanprodan/caddy
+    networks:
+      - net
+    environment:
+      - DOCKER_GWBRIDGE_IP=172.18.0.1
+    configs:
+      - source: dockerd_config
+        target: /etc/caddy/Caddyfile
+    deploy:
+      mode: global
+      resources:
+        limits:
+          memory: 128M
+        reservations:
+          memory: 64M
+
+  cadvisor:
+    image: google/cadvisor
+    networks:
+      - net
+    command: -logtostderr -docker_only
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock:ro
+      - /:/rootfs:ro
+      - /var/run:/var/run
+      - /sys:/sys:ro
+      - /var/lib/docker/:/var/lib/docker:ro
+    deploy:
+      mode: global
+      resources:
+        limits:
+          memory: 128M
+        reservations:
+          memory: 64M
+
+  grafana:
+    image: stefanprodan/swarmprom-grafana
+    networks:
+      - net
+    environment:
+      - GF_SECURITY_ADMIN_USER=${ADMIN_USER:-admin}
+      - GF_SECURITY_ADMIN_PASSWORD=${ADMIN_PASSWORD:-admin}
+      - GF_USERS_ALLOW_SIGN_UP=false
+    volumes:
+      - grafana:/var/lib/grafana
+    deploy:
+      mode: replicated
+      replicas: 1
+      placement:
+        constraints:
+          - node.hostname == manager-2
+      resources:
+        limits:
+          memory: 128M
+        reservations:
+          memory: 64M
+
+  alertmanager:
+    image: stefanprodan/swarmprom-alertmanager
+    networks:
+      - net
+    environment:
+      - SLACK_URL=${SLACK_URL:-https://hooks.slack.com/services/TOKEN}
+      - SLACK_CHANNEL=${SLACK_CHANNEL:-general}
+      - SLACK_USER=${SLACK_USER:-alertmanager}
+    command:
+      - '-config.file=/etc/alertmanager/alertmanager.yml'
+      - '-storage.path=/alertmanager'
+    volumes:
+      - alertmanager:/alertmanager
+    deploy:
+      mode: replicated
+      replicas: 1
+      placement:
+        constraints:
+          - node.hostname == manager-2
+      resources:
+        limits:
+          memory: 128M
+        reservations:
+          memory: 64M
+
+  unsee:
+    image: cloudflare/unsee:v0.8.0
+    networks:
+      - net
+    environment:
+      - "ALERTMANAGER_URIS=default:http://alertmanager:9093"
+    deploy:
+      mode: replicated
+      replicas: 1
+
+  node-exporter:
+    image: stefanprodan/swarmprom-node-exporter
+    networks:
+      - net
+    environment:
+      - NODE_ID={{.Node.ID}}
+    volumes:
+      - /proc:/host/proc:ro
+      - /sys:/host/sys:ro
+      - /:/rootfs:ro
+      - /etc/hostname:/etc/nodename
+    command:
+      - '-collector.textfile.directory=/etc/node-exporter/'
+      - '-collector.procfs=/host/proc'
+      - '-collector.sysfs=/host/sys'
+      - '-collector.filesystem.ignored-mount-points=^/(sys|proc|dev|host|etc)($$|/)'
+      - '-collectors.enabled=textfile,conntrack,diskstats,entropy,filefd,filesystem,loadavg,mdadm,meminfo,netdev,netstat,stat,time,vmstat'
+    deploy:
+      mode: global
+      resources:
+        limits:
+          memory: 128M
+        reservations:
+          memory: 64M
+
+  prometheus:
+    image: stefanprodan/swarmprom-prometheus
+    networks:
+      - net
+    command:
+      - '-config.file=/etc/prometheus/prometheus.yml'
+      - '-storage.local.path=/prometheus'
+      - '-web.console.libraries=/etc/prometheus/console_libraries'
+      - '-web.console.templates=/etc/prometheus/consoles'
+      - '-storage.local.target-heap-size=1073741824'
+      - '-storage.local.retention=24h'
+      - '-alertmanager.url=http://alertmanager:9093'
+    volumes:
+      - prometheus:/prometheus
+    configs:
+      - source: node_rules
+        target: /etc/prometheus/swarm_node.rules
+      - source: task_rules
+        target: /etc/prometheus/swarm_task.rules
+    deploy:
+      mode: replicated
+      replicas: 1
+      placement:
+        constraints:
+          - node.hostname == manager-2
+      resources:
+        limits:
+          memory: 2048M
+        reservations:
+          memory: 1024M
+
+  caddy:
+    image: stefanprodan/caddy
+    ports:
+      - "3000:3000"
+      - "9090:9090"
+      - "9093:9093"
+      - "9094:9094"
+    networks:
+      - net
+    environment:
+      - ADMIN_USER=${ADMIN_USER:-admin}
+      - ADMIN_PASSWORD=${ADMIN_PASSWORD:-admin}
+    configs:
+      - source: caddy_config
+        target: /etc/caddy/Caddyfile
+    deploy:
+      mode: replicated
+      replicas: 1
+      placement:
+        constraints:
+          - node.hostname == manager-2
+      resources:
+        limits:
+          memory: 128M
+        reservations:
+          memory: 64M
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:3000"]
+      interval: 5s
+      timeout: 1s
+      retries: 5
