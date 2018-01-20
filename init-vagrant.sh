@@ -3,5 +3,5 @@
 vagrant plugin install vagrant-alpine
 vagrant plugin install vagrant-scp
 
-vagrant up
-vagrant halt
+./vagrant up
+./vagrant halt
