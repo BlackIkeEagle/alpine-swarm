@@ -12,7 +12,7 @@ apk add --update --no-cache nfs-utils
 sed -e 's/^\\(ttyS0.*\\)/#\\1/' -i /etc/inittab
 rc-update add nfs default
 mkdir -p /srv/storage
-echo '/srv/storage 192.168.250.0/24(rw,async,no_subtree_check)' >> /etc/exports
+echo '/srv/storage 192.168.250.0/24(rw,async,no_root_squash,no_subtree_check)' >> /etc/exports
 SCRIPT
 
 $alpinescript = <<SCRIPT
