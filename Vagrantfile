@@ -52,7 +52,7 @@ Vagrant.configure("2") do |config|
       manager.vm.network :private_network, ip: "192.168.250.3#{b}"
       manager.vm.provision "shell", inline: $alpinescript
       manager.vm.provider :virtualbox do |v|
-        v.memory = 2048
+        v.memory = 3072
         v.linked_clone = true
       end
     end
