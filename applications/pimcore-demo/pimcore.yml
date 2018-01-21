@@ -1,0 +1,51 @@
+version: '3.3'
+
+networks:
+  default:
+    ipam:
+      config:
+        - subnet: 10.100.4.0/24
+  traefik_webproxy:
+    external: true
+
+
+services:
+  mysql:
+    image: mysql:5.7
+    environment:
+      - MYSQL_ROOT_PASSWORD=${MYSQL_ROOT_PASSWORD:-toor}
+    command: --innodb-doublewrite=0
+    deploy:
+      placement:
+        constraints: [node.hostname == manager-1]
+
+  mailcatcher:
+    image: schickling/mailcatcher
+
+  application:
+    image: blackikeeagle/swarm-pimcore-demo-php:0.0.0
+    environment:
+      - DEVELOPMENT=noprofile # we want to use mailcatcher in the demo
+    volumes:
+      - /srv/storage/pimcore/web-var:/phpapp/web/var
+      - /srv/storage/pimcore/var:/phpapp/var
+
+  nginx:
+    image: blackikeeagle/swarm-pimcore-demo-nginx:0.0.0
+    volumes:
+      - /srv/storage/pimcore/web-var:/phpapp/web/var
+    networks:
+      - default
+      - traefik_webproxy
+    deploy:
+      labels:
+        # tell traefik to route to the container
+        - "traefik.enable=true"
+        # a name for this application in traefik, must be unique
+        - "traefik.backend=pimcore"
+        # hostnames to route to this container (and retrieve ssl certs for)
+        - "traefik.frontend.rule=Host:pimcore-demo.test"
+        # network this container is attached to (global name)
+        - "traefik.docker.network=traefik_webproxy"
+        # port this container listens on
+        - "traefik.port=80"
