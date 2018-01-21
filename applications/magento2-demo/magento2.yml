@@ -26,7 +26,7 @@ services:
     image: schickling/mailcatcher
 
   application:
-    image: blackikeeagle/swarm-magento2-demo-php:0.0.0
+    image: blackikeeagle/swarm-magento2-demo-php:0.0.1
     environment:
       - DEVELOPMENT=noprofile # we want to use mailcatcher in the demo
     volumes:
@@ -35,7 +35,7 @@ services:
       - /srv/storage/magento2/media:/phpapp/pub/media
 
   nginx:
-    image: blackikeeagle/swarm-magento2-demo-nginx:0.0.0
+    image: blackikeeagle/swarm-magento2-demo-nginx:0.0.1
     volumes:
       - /srv/storage/magento2/media:/phpapp/pub/media
     networks:
