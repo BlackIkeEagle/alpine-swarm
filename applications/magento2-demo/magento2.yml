@@ -1,0 +1,55 @@
+version: '3.3'
+
+networks:
+  default:
+    ipam:
+      config:
+        - subnet: 10.100.6.0/24
+  traefik_webproxy:
+    external: true
+
+
+services:
+  redis:
+    image: redis:alpine
+
+  mysql:
+    image: mysql:5.7
+    environment:
+      - MYSQL_ROOT_PASSWORD=toor
+    command: --innodb-doublewrite=0
+    deploy:
+      placement:
+        constraints: [node.hostname == manager-2]
+
+  mailcatcher:
+    image: schickling/mailcatcher
+
+  application:
+    image: blackikeeagle/swarm-magento2-demo-php:0.0.0
+    environment:
+      - DEVELOPMENT=noprofile # we want to use mailcatcher in the demo
+    volumes:
+      - /srv/storage/magento2/env.php:/phpapp/app/etc/env.php
+      - /srv/storage/magento2/var:/phpapp/var
+      - /srv/storage/magento2/media:/phpapp/pub/media
+
+  nginx:
+    image: blackikeeagle/swarm-magento2-demo-nginx:0.0.0
+    volumes:
+      - /srv/storage/magento2/media:/phpapp/pub/media
+    networks:
+      - default
+      - traefik_webproxy
+    deploy:
+      labels:
+        # tell traefik to route to the container
+        - "traefik.enable=true"
+        # a name for this application in traefik, must be unique
+        - "traefik.backend=magento2"
+        # hostnames to route to this container (and retrieve ssl certs for)
+        - "traefik.frontend.rule=Host:magento2-demo.test"
+        # network this container is attached to (global name)
+        - "traefik.docker.network=traefik_webproxy"
+        # port this container listens on
+        - "traefik.port=80"
