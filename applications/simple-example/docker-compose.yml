@@ -1,0 +1,17 @@
+version: '3'
+
+services:
+  application:
+    image: dockerwest/php:7.1
+    environment:
+      - C_UID=${C_UID:-1000}
+      - C_GID=${G_UID:-1000}
+      - DEVELOPMENT=0
+    volumes:
+      - ./phpapp:/phpapp
+
+  nginx:
+    image: nginx:alpine
+    volumes:
+      - ./nginx/default.conf:/etc/nginx/conf.d/default.conf
+      - ./phpapp:/phpapp

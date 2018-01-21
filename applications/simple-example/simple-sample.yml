@@ -1,0 +1,37 @@
+version: '3.3'
+
+networks:
+  default:
+    ipam:
+      config:
+        - subnet: 10.100.5.0/24
+  traefik_webproxy:
+    external: true
+
+services:
+  application:
+    image: blackikeeagle/swarm-sample-php
+    deploy:
+      replicas: 4
+      update_config:
+        parallelism: 2 # update per 2 running containers
+        delay: 10s # wait for 10s healthy status before continuing
+
+  nginx:
+    image: blackikeeagle/swarm-sample-nginx
+    networks:
+      - default
+      - traefik_webproxy
+    deploy:
+      labels:
+        # tell traefik to route to the container
+        - "traefik.enable=true"
+        # a name for this application in traefik, must be unique
+        - "traefik.backend=simple-sample"
+        # hostnames to route to this container (and retrieve ssl certs for)
+        - "traefik.frontend.rule=Host:simple-sample.test"
+        # network this container is attached to (global name)
+        - "traefik.docker.network=traefik_webproxy"
+        # port this container listens on
+        - "traefik.port=80"
+

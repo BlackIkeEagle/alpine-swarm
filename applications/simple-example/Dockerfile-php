@@ -1,0 +1,4 @@
+FROM dockerwest/php:7.2
+
+COPY ./phpapp /phpapp/
+
