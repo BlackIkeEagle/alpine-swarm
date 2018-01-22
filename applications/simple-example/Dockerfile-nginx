@@ -1,3 +1,4 @@
 FROM nginx:alpine
 
+RUN mkdir /phpapp/ && touch /phpapp/index.php && touch /phpapp/favicon.ico && chown -R nginx:nginx /phpapp
 COPY ./nginx/default.conf /etc/nginx/conf.d/
