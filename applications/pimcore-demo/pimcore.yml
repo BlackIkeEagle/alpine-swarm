@@ -8,19 +8,28 @@ networks:
   traefik_webproxy:
     external: true
 
-
 services:
   mysql:
     image: mysql:5.7
     environment:
       - MYSQL_ROOT_PASSWORD=${MYSQL_ROOT_PASSWORD:-toor}
     command: --innodb-doublewrite=0
+    logging:
+      driver: syslog
+      options:
+        tag: pimcore-mysql
+        syslog-address: "tcp://192.168.250.21:514"
     deploy:
       placement:
         constraints: [node.hostname == manager-1]
 
   mailcatcher:
     image: schickling/mailcatcher
+    logging:
+      driver: syslog
+      options:
+        tag: pimcore-mailcatcher
+        syslog-address: "tcp://192.168.250.21:514"
 
   application:
     image: blackikeeagle/swarm-pimcore-demo-php:0.0.0
@@ -29,6 +38,13 @@ services:
     volumes:
       - /srv/storage/pimcore/web-var:/phpapp/web/var
       - /srv/storage/pimcore/var:/phpapp/var
+    logging:
+      driver: syslog
+      options:
+        tag: pimcore-application
+        syslog-address: "tcp://192.168.250.21:514"
+    deploy:
+      replicas: 1
 
   nginx:
     image: blackikeeagle/swarm-pimcore-demo-nginx:0.0.0
@@ -37,7 +53,13 @@ services:
     networks:
       - default
       - traefik_webproxy
+    logging:
+      driver: syslog
+      options:
+        tag: pimcore-nginx
+        syslog-address: "tcp://192.168.250.21:514"
     deploy:
+      replicas: 2
       labels:
         # tell traefik to route to the container
         - "traefik.enable=true"

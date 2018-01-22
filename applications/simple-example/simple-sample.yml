@@ -11,6 +11,11 @@ networks:
 services:
   application:
     image: blackikeeagle/swarm-sample-php
+    logging:
+      driver: syslog
+      options:
+        tag: simple-sample-php
+        syslog-address: "tcp://192.168.250.21:514"
     deploy:
       replicas: 4
       update_config:
@@ -22,6 +27,11 @@ services:
     networks:
       - default
       - traefik_webproxy
+    logging:
+      driver: syslog
+      options:
+        tag: simple-sample-nginx
+        syslog-address: "tcp://192.168.250.21:514"
     deploy:
       labels:
         # tell traefik to route to the container

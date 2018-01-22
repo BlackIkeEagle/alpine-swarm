@@ -8,22 +8,36 @@ networks:
   traefik_webproxy:
     external: true
 
-
 services:
   redis:
     image: redis:alpine
+    logging:
+      driver: syslog
+      options:
+        tag: magento-redis
+        syslog-address: "tcp://192.168.250.21:514"
 
   mysql:
     image: mysql:5.7
     environment:
       - MYSQL_ROOT_PASSWORD=toor
     command: --innodb-doublewrite=0
+    logging:
+      driver: syslog
+      options:
+        tag: magento-mysql
+        syslog-address: "tcp://192.168.250.21:514"
     deploy:
       placement:
         constraints: [node.hostname == manager-2]
 
   mailcatcher:
     image: schickling/mailcatcher
+    logging:
+      driver: syslog
+      options:
+        tag: magento-mailcatcher
+        syslog-address: "tcp://192.168.250.21:514"
 
   application:
     image: blackikeeagle/swarm-magento2-demo-php:0.0.1
@@ -33,6 +47,13 @@ services:
       - /srv/storage/magento2/env.php:/phpapp/app/etc/env.php
       - /srv/storage/magento2/var:/phpapp/var
       - /srv/storage/magento2/media:/phpapp/pub/media
+    logging:
+      driver: syslog
+      options:
+        tag: magento-application
+        syslog-address: "tcp://192.168.250.21:514"
+    deploy:
+      replicas: 1
 
   nginx:
     image: blackikeeagle/swarm-magento2-demo-nginx:0.0.1
@@ -41,6 +62,11 @@ services:
     networks:
       - default
       - traefik_webproxy
+    logging:
+      driver: syslog
+      options:
+        tag: magento-nginx
+        syslog-address: "tcp://192.168.250.21:514"
     deploy:
       labels:
         # tell traefik to route to the container
