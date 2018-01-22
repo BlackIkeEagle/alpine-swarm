@@ -8,9 +8,14 @@ networks:
   traefik_webproxy:
     external: true
 
+volumes:
+    mysql: {}
+
 services:
   redis:
     image: redis:alpine
+    volumes:
+      - /srv/storage/magento2/redis:/data
     logging:
       driver: syslog
       options:
@@ -22,6 +27,8 @@ services:
     environment:
       - MYSQL_ROOT_PASSWORD=toor
     command: --innodb-doublewrite=0
+    volumes:
+      - mysql:/var/lib/mysql
     logging:
       driver: syslog
       options:

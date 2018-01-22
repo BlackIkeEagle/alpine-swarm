@@ -8,12 +8,17 @@ networks:
   traefik_webproxy:
     external: true
 
+volumes:
+    mysql: {}
+
 services:
   mysql:
     image: mysql:5.7
     environment:
       - MYSQL_ROOT_PASSWORD=${MYSQL_ROOT_PASSWORD:-toor}
     command: --innodb-doublewrite=0
+    volumes:
+      - mysql:/var/lib/mysql
     logging:
       driver: syslog
       options:
