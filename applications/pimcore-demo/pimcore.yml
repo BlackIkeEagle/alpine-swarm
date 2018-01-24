@@ -37,7 +37,7 @@ services:
         syslog-address: "tcp://192.168.250.21:514"
 
   application:
-    image: blackikeeagle/swarm-pimcore-demo-php:0.0.0
+    image: blackikeeagle/swarm-pimcore-demo-php:0.0.2
     environment:
       - DEVELOPMENT=noprofile # we want to use mailcatcher in the demo
     volumes:
@@ -50,6 +50,21 @@ services:
         syslog-address: "tcp://192.168.250.21:514"
     deploy:
       replicas: 1
+
+  cron:
+    image: blackikeeagle/swarm-pimcore-demo-php:0.0.2
+    environment:
+      - DEVELOPMENT=noprofile # we want to use mailcatcher in the demo
+      - "CRON=0 */5 * * * *"
+    command: php bin/console maintenance
+    volumes:
+      - /srv/storage/pimcore/web-var:/phpapp/web/var
+      - /srv/storage/pimcore/var:/phpapp/var
+    logging:
+      driver: syslog
+      options:
+        tag: pimcore-cron
+        syslog-address: "tcp://192.168.250.21:514"
 
   nginx:
     image: blackikeeagle/swarm-pimcore-demo-nginx:0.0.0
