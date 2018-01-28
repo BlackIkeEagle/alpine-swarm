@@ -9,3 +9,5 @@ vagrant scp env.php storage-1:env.php
 vagrant ssh storage-1 -- 'cd /srv/storage/magento2/; sudo mv /home/vagrant/env.php ./'
 vagrant ssh storage-1 -- 'cd /srv/storage/magento2/; sudo chown -R 33:33 var media env.php; sudo chown -R 100:101 redis'
 
+vagrant ssh manager-2 -- 'sudo mkdir /var/lib/magento2-mysql; sudo chown 999:999 /var/lib/magento2-mysql'
+

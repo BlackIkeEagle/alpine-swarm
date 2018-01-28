@@ -6,3 +6,5 @@ vagrant ssh storage-1 -- 'cd /srv/storage/pimcore/; sudo wget -c https://github.
 vagrant ssh storage-1 -- 'cd /srv/storage/pimcore/; sudo tar -zxf var.tar.gz; sudo rm var.tar.gz'
 vagrant ssh storage-1 -- 'cd /srv/storage/pimcore/; sudo chown -R 33:33 var web-var'
 
+vagrant ssh manager-1 -- 'sudo mkdir /var/lib/pimcore-mysql; sudo chown 999:999 /var/lib/pimcore-mysql'
+
