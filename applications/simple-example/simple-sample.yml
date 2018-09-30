@@ -4,7 +4,7 @@ networks:
   default:
     ipam:
       config:
-        - subnet: 10.100.5.0/24
+        - subnet: 10.110.1.0/24
   traefik_webproxy:
     external: true
 
