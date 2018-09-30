@@ -34,7 +34,7 @@ Vagrant.configure("2") do |config|
 
   (1..1).each do |a|
     config.vm.define "storage-#{a}" do |storage|
-      storage.vm.box = "BlackIkeEagle/alpine-3.7"
+      storage.vm.box = "BlackIkeEagle/alpine-3.8"
       storage.vm.synced_folder '.', '/vagrant', disabled: true
       storage.vm.hostname = "storage-#{a}"
       storage.vm.network :private_network, ip: "192.168.250.2#{a}"
@@ -47,7 +47,7 @@ Vagrant.configure("2") do |config|
 
   (1..2).each do |b|
     config.vm.define "manager-#{b}" do |manager|
-      manager.vm.box = "BlackIkeEagle/alpine-3.7"
+      manager.vm.box = "BlackIkeEagle/alpine-3.8"
       manager.vm.synced_folder '.', '/vagrant', disabled: true
       manager.vm.hostname = "manager-#{b}"
       manager.vm.network :private_network, ip: "192.168.250.3#{b}"
@@ -61,7 +61,7 @@ Vagrant.configure("2") do |config|
 
   (1..4).each do |c|
     config.vm.define "node-#{c}" do |node|
-      node.vm.box = "BlackIkeEagle/alpine-3.7"
+      node.vm.box = "BlackIkeEagle/alpine-3.8"
       node.vm.synced_folder '.', '/vagrant', disabled: true
       node.vm.hostname = "node-#{c}"
       node.vm.network :private_network, ip: "192.168.250.4#{c}"
