@@ -45,20 +45,6 @@ Vagrant.configure("2") do |config|
     end
   end
 
-  (1..2).each do |b|
-    config.vm.define "manager-#{b}" do |manager|
-      manager.vm.box = "BlackIkeEagle/alpine-3.8"
-      manager.vm.synced_folder '.', '/vagrant', disabled: true
-      manager.vm.hostname = "manager-#{b}"
-      manager.vm.network :private_network, ip: "192.168.250.3#{b}"
-      manager.vm.provision "shell", inline: $alpinescript
-      manager.vm.provider :virtualbox do |v|
-        v.memory = 3072
-        v.linked_clone = true
-      end
-    end
-  end
-
   (1..4).each do |c|
     config.vm.define "node-#{c}" do |node|
       node.vm.box = "BlackIkeEagle/alpine-3.8"
@@ -68,6 +54,20 @@ Vagrant.configure("2") do |config|
       node.vm.provision "shell", inline: $alpinescript
       node.vm.provider :virtualbox do |v|
         v.memory = 1536
+        v.linked_clone = true
+      end
+    end
+  end
+
+  (1..2).each do |b|
+    config.vm.define "manager-#{b}" do |manager|
+      manager.vm.box = "BlackIkeEagle/alpine-3.8"
+      manager.vm.synced_folder '.', '/vagrant', disabled: true
+      manager.vm.hostname = "manager-#{b}"
+      manager.vm.network :private_network, ip: "192.168.250.3#{b}"
+      manager.vm.provision "shell", inline: $alpinescript
+      manager.vm.provider :virtualbox do |v|
+        v.memory = 3072
         v.linked_clone = true
       end
     end
