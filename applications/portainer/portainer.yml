@@ -1,0 +1,44 @@
+version: '3.3'
+
+networks:
+  default:
+    ipam:
+      config:
+        - subnet: 10.100.4.0/24
+
+services:
+  agent:
+    image: portainer/agent
+    environment:
+      # REQUIRED: Should be equal to the service name prefixed by "tasks." when
+      # deployed inside an overlay network
+      AGENT_CLUSTER_ADDR: tasks.agent
+      # AGENT_PORT: 9001
+      # LOG_LEVEL: debug
+    volumes:
+      - type: bind
+        source: /var/run/docker.sock
+        target: /var/run/docker.sock
+        read_only: true
+      - type: bind
+        source: /var/lib/docker/volumes
+        target: /var/lib/docker/volumes
+    deploy:
+      mode: global
+
+  portainer:
+    image: portainer/portainer
+    command: -H tcp://tasks.agent:9001 --tlsskipverify
+    ports:
+      - target: 9000
+        published: 9000
+        protocol: tcp
+        mode: ingress
+    volumes:
+      - type: bind
+        source: /srv/storage/portainer
+        target: /data
+    deploy:
+      placement:
+        constraints: [node.role == manager]
+
