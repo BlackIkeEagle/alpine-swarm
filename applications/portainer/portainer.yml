@@ -6,6 +6,14 @@ networks:
       config:
         - subnet: 10.100.4.0/24
 
+volumes:
+  portainer:
+    driver: local
+    driver_opts:
+      type: nfs
+      o: addr=192.168.250.21,rw
+      device: ":/srv/storage/portainer"
+
 services:
   agent:
     image: portainer/agent
@@ -19,7 +27,6 @@ services:
       - type: bind
         source: /var/run/docker.sock
         target: /var/run/docker.sock
-        read_only: true
       - type: bind
         source: /var/lib/docker/volumes
         target: /var/lib/docker/volumes
@@ -35,9 +42,11 @@ services:
         protocol: tcp
         mode: ingress
     volumes:
-      - type: bind
-        source: /srv/storage/portainer
+      - type: volume
+        source: portainer
         target: /data
+        volume:
+          nocopy: true
     deploy:
       placement:
         constraints: [node.role == manager]
