@@ -8,11 +8,45 @@ networks:
   traefik_webproxy:
     external: true
 
+volumes:
+  redis:
+    driver: local
+    driver_opts:
+      type: nfs
+      o: addr=192.168.250.21,rw
+      device: ":/srv/storage/magento2/redis"
+  mysql:
+    driver: local
+    driver_opts:
+      type: nfs
+      o: addr=192.168.250.21,rw
+      device: ":/srv/storage/magento2/mysql"
+  magento_var:
+    driver: local
+    driver_opts:
+      type: nfs
+      o: addr=192.168.250.21,rw
+      device: ":/srv/storage/magento2/var"
+  magento_media:
+    driver: local
+    driver_opts:
+      type: nfs
+      o: addr=192.168.250.21,rw
+      device: ":/srv/storage/magento2/media"
+
+configs:
+  magento_config:
+    file: ./env.php
+
 services:
   redis:
     image: redis:alpine
     volumes:
-      - /srv/storage/magento2/redis:/data
+      - type: volume
+        source: redis
+        target: /data
+        volume:
+          nocopy: true
     logging:
       driver: syslog
       options:
@@ -25,7 +59,11 @@ services:
       - MYSQL_ROOT_PASSWORD=toor
     command: --innodb-doublewrite=0
     volumes:
-      - /var/lib/magento2-mysql:/var/lib/mysql
+      - type: volume
+        source: mysql
+        target: /var/lib/mysql
+        volume:
+          nocopy: true
     logging:
       driver: syslog
       options:
@@ -33,7 +71,7 @@ services:
         syslog-address: "tcp://192.168.250.21:514"
     deploy:
       placement:
-        constraints: [node.hostname == manager-2]
+        constraints: [node.role == manager]
 
   mailcatcher:
     image: schickling/mailcatcher
@@ -48,9 +86,19 @@ services:
     environment:
       - DEVELOPMENT=noprofile # we want to use mailcatcher in the demo
     volumes:
-      - /srv/storage/magento2/env.php:/phpapp/app/etc/env.php
-      - /srv/storage/magento2/var:/phpapp/var
-      - /srv/storage/magento2/media:/phpapp/pub/media
+      - type: volume
+        source: magento_var
+        target: /phpapp/var
+        volume:
+          nocopy: true
+      - type: volume
+        source: magento_media
+        target: /phpapp/pub/media
+        volume:
+          nocopy: true
+    configs:
+      - source: magento_config
+        target: /phpapp/app/etc/env.php
     logging:
       driver: syslog
       options:
@@ -66,9 +114,19 @@ services:
       - "CRON=0 * * * * *"
     command: php bin/magento cron:run
     volumes:
-      - /srv/storage/magento2/env.php:/phpapp/app/etc/env.php
-      - /srv/storage/magento2/var:/phpapp/var
-      - /srv/storage/magento2/media:/phpapp/pub/media
+      - type: volume
+        source: magento_var
+        target: /phpapp/var
+        volume:
+          nocopy: true
+      - type: volume
+        source: magento_media
+        target: /phpapp/pub/media
+        volume:
+          nocopy: true
+    configs:
+      - source: magento_config
+        target: /phpapp/app/etc/env.php
     logging:
       driver: syslog
       options:
@@ -78,7 +136,11 @@ services:
   nginx:
     image: blackikeeagle/swarm-magento2-demo-nginx:0.0.2
     volumes:
-      - /srv/storage/magento2/media:/phpapp/pub/media
+      - type: volume
+        source: magento_media
+        target: /phpapp/pub/media
+        volume:
+          nocopy: true
     networks:
       - default
       - traefik_webproxy
